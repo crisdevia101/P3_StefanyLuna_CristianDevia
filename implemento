@@ -53,5 +53,35 @@ if _name_ == "_main_":
                 nombre_archivo = input("Nombre del archivo (ej: recorte.png): ") or "recorte.png"
                 estudio.zoom_y_guardar(z, x1, y1, x2, y2, nombre_archivo)
 
+            elif opcion == "4":
+                print("\nTipos de binarización:")
+                print(" 0 - THRESH_BINARY")
+                print(" 1 - THRESH_BINARY_INV")
+                print(" 2 - THRESH_TRUNC")
+                print(" 3 - THRESH_TOZERO")
+                print(" 4 - THRESH_TOZERO_INV")
+
+                tipo = int(input("Seleccione el tipo de binarización (0-4): "))
+                valor = int(input("Ingrese el valor de umbral (0-255): "))
+                z = int(input("Índice z: "))
+                x1 = int(input("x1: "))
+                y1 = int(input("y1: "))
+                x2 = int(input("x2: "))
+                y2 = int(input("y2: "))
+                tipo = int(input("Tipo de umbral (0 a 4): "))
+                valor = int(input("Valor de umbral (0-255): "))
+                estudio.segmentar_umbral(z, x1, y1, x2, y2, tipo, valor)
+
+            elif opcion == "5":
+                z = int(input("Índice z: "))
+                x1 = int(input("x1: "))
+                y1 = int(input("y1: "))
+                x2 = int(input("x2: "))
+                y2 = int(input("y2: "))
+                op = input("Operación (erode, dilate, open, close, gradient, tophat, blackhat): ")
+                k = int(input("Tamaño del kernel: "))
+                nombre_archivo = input("Nombre del archivo resultante: ") or "morfologia.png"
+                estudio.transformacion_morfologica(z, x1, y1, x2, y2, op, k, nombre_archivo)
+
 
 
