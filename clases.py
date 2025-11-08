@@ -30,3 +30,73 @@ class GestorDICOM:
                 if n.lower().endswith('.dcm'):
                     archivos.append(os.path.join(raiz, n))
         return archivos
+
+    def cargar_imagenes(self):
+        """
+        Carga y ordena los archivos DICOM
+        """
+        archivos = self._obtener_archivos_dcm()
+        if len(archivos) == 0:
+            raise FileNotFoundError("No se encontraron archivos DICOM.")
+
+        datasets = []
+        for a in archivos:
+            try:
+                ds = pydicom.dcmread(a)
+                datasets.append(ds)
+            except:
+                continue
+
+    def cargar_imagenes(self):
+        """
+        Carga y ordena los archivos DICOM
+        """
+        archivos = self._obtener_archivos_dcm()
+        if len(archivos) == 0:
+            raise FileNotFoundError("No se encontraron archivos DICOM.")
+
+        datasets = []
+        for a in archivos:
+            try:
+                ds = pydicom.dcmread(a)
+                datasets.append(ds)
+            except:
+                continue
+
+    def cargar_imagenes(self):
+        """
+        Carga y ordena los archivos DICOM
+        """
+        archivos = self._obtener_archivos_dcm()
+        if len(archivos) == 0:
+            raise FileNotFoundError("No se encontraron archivos DICOM.")
+
+        datasets = []
+        for a in archivos:
+            try:
+                ds = pydicom.dcmread(a)
+                datasets.append(ds)
+            except:
+                continue
+
+        def clave_orden(ds):
+            """
+            Ordena los cortes DICOM segun su posicion o numero de instancia
+            y obtiene el espaciado de pixel y el espesor del corte
+            """
+            if hasattr(ds, "InstanceNumber"):
+                return int(ds.InstanceNumber)
+            elif hasattr(ds, "ImagePositionPatient"):
+                return float(ds.ImagePositionPatient[2])
+            elif hasattr(ds, "SliceLocation"):
+                return float(ds.SliceLocation)
+            else:
+                return 0
+
+        datasets.sort(key=clave_orden)
+        self.lista_slices = datasets
+
+        primero = datasets[0]
+        self.espaciado_pixel = [float(primero.PixelSpacing[0]), float(primero.PixelSpacing[1])] if hasattr(primero, "PixelSpacing") else [1, 1]
+        self.espesor_corte = float(primero.SliceThickness) if hasattr(primero, "SliceThickness") else 1
+
