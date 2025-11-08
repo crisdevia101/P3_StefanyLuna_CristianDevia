@@ -177,3 +177,84 @@ class GestorDICOM:
         ruta_carpeta = os.path.join("resultados", nombre_subcarpeta)
         os.makedirs(ruta_carpeta, exist_ok=True)
         return ruta_carpeta
+
+    def mostrar_cortes_ortogonales(self, indice=None):
+        """
+        Muestra y guarda los tres cortes ortogonales (transversal, coronal y sagital)
+        del volumen 3D en una sola figura
+        """
+        z, h, w = self.volumen.shape
+        if indice is None:
+            indice = z // 2
+
+        corte_transversal = self.volumen[indice, :, :]
+        corte_coronal = self.volumen[:, :, w // 2]
+        corte_sagital = self.volumen[:, h // 2, :]
+
+        fig, ejes = plt.subplots(1, 3, figsize=(10, 4))
+        ejes[0].imshow(corte_transversal, cmap='gray')
+        ejes[0].set_title("Transversal")
+        ejes[1].imshow(corte_coronal, cmap='gray')
+        ejes[1].set_title("Coronal")
+        ejes[2].imshow(corte_sagital, cmap='gray')
+        ejes[2].set_title("Sagital")
+        for ax in ejes:
+            ax.axis("off")
+        plt.suptitle(self.nombre_estudio)
+
+        ruta_carpeta = self._asegurar_carpeta("cortes")
+        nombre_archivo = os.path.join(ruta_carpeta, f"cortes_{self.nombre_estudio}.png")
+        plt.savefig(nombre_archivo, bbox_inches='tight')
+        plt.show()
+        print("Cortes ortogonales guardados en:", nombre_archivo)
+
+    def zoom_y_guardar(self, indice_z, x1, y1, x2, y2, nombre_salida="recorte.png"):
+        """
+        Realiza un recorte (zoom) del corte seleccionado, muestra sus dimensiones
+        en milimetros y guarda el resiltado en la carpeta "zoom"
+        """
+        corte = self.volumen[indice_z, :, :]
+        x_min, x_max = sorted([x1, x2])
+        y_min, y_max = sorted([y1, y2])
+
+        h, w = corte.shape
+        x_min = max(0, min(x_min, w - 1))
+        x_max = max(0, min(x_max, w))
+        y_min = max(0, min(y_min, h - 1))
+        y_max = max(0, min(y_max, h))
+
+        if x_max <= x_min or y_max <= y_min:
+            print("Coordenadas de recorte inválidas.")
+            return
+
+        recorte = corte[y_min:y_max, x_min:x_max]
+        recorte_norm = self._normalizar_a_uint8(recorte)
+
+        alto_pix, ancho_pix = recorte_norm.shape
+        esp_h, esp_w = self.gestor.espaciado_pixel
+        esp_z = self.gestor.espesor_corte
+
+        ancho_mm = ancho_pix * esp_w
+        alto_mm = alto_pix * esp_h
+        espesor_mm = esp_z
+
+        recorte_bgr = cv2.cvtColor(recorte_norm, cv2.COLOR_GRAY2BGR)
+        cv2.rectangle(recorte_bgr, (0, 0), (ancho_pix - 1, alto_pix - 1), (0, 255, 0), 2)
+        texto = f"W={ancho_mm:.1f}mm H={alto_mm:.1f}mm T={espesor_mm:.1f}mm"
+        cv2.putText(recorte_bgr, texto, (5, alto_pix - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+        recorte_redimensionado = cv2.resize(recorte_bgr, (256, 256), interpolation=cv2.INTER_LINEAR)
+
+        ruta_carpeta = self._asegurar_carpeta("zoom")
+        ruta_guardado = os.path.join(ruta_carpeta, nombre_salida)
+        cv2.imwrite(ruta_guardado, recorte_redimensionado)
+        print("Recorte guardado en:", ruta_guardado)
+
+        fig, ejes = plt.subplots(1, 2, figsize=(8, 4))
+        ejes[0].imshow(corte, cmap='gray')
+        ejes[0].set_title("Corte original")
+        ejes[0].axis("off")
+        ejes[1].imshow(cv2.cvtColor(recorte_redimensionado, cv2.COLOR_BGR2RGB))
+        ejes[1].set_title("Recorte guardado")
+        ejes[1].axis("off")
+        plt.show()
