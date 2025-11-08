@@ -164,3 +164,16 @@ class GestorDICOM:
             return abs((t2 - t1).total_seconds())
         except:
             return None
+            
+    def _normalizar_a_uint8(self, imagen):
+        minimo, maximo = np.min(imagen), np.max(imagen)
+        if maximo == minimo:
+            return np.zeros_like(imagen, dtype=np.uint8)
+        normalizada = ((imagen - minimo) / (maximo - minimo)) * 255
+        return normalizada.astype(np.uint8)
+
+    def _asegurar_carpeta(self, nombre_subcarpeta):
+        """Crea carpetas dentro de resultados/ según la función."""
+        ruta_carpeta = os.path.join("resultados", nombre_subcarpeta)
+        os.makedirs(ruta_carpeta, exist_ok=True)
+        return ruta_carpeta
