@@ -132,3 +132,35 @@ class GestorDICOM:
             registros.append(datos)
         df = pd.DataFrame(registros)
         return df
+    class EstudioImaginologico:
+    def __init__(self, gestor_dicom, nombre_estudio="Estudio"):
+        """
+        Inicializa la clase para el objeto de estudio imaginologico
+        y construye o asigna el volumen 3D y guarda su forma
+        """
+        self.nombre_estudio = nombre_estudio
+        self.gestor = gestor_dicom
+        self.volumen = gestor_dicom.volumen if gestor_dicom.volumen is not None else gestor_dicom.construir_volumen()
+
+        primer = gestor_dicom.lista_slices[0]
+        
+        self.StudyDate = getattr(primer, "StudyDate", "")
+        self.StudyTime = getattr(primer, "StudyTime", "")
+        self.Modality = getattr(primer, "Modality", "")
+        self.StudyDescription = getattr(primer, "StudyDescription", "")
+        self.SeriesTime = getattr(primer, "SeriesTime", "")
+        self.DurationSeconds = self._calcular_duracion(self.StudyTime, self.SeriesTime)
+        self.ImageShape = self.volumen.shape
+
+    def _calcular_duracion(self, hora_ini, hora_fin):
+        """
+        Calcula la duracion en segundos a partir de las horas dadas
+        """
+        try:
+            if not hora_ini or not hora_fin:
+                return None
+            t1 = datetime.strptime(hora_ini.split('.')[0], "%H%M%S")
+            t2 = datetime.strptime(hora_fin.split('.')[0], "%H%M%S")
+            return abs((t2 - t1).total_seconds())
+        except:
+            return None
