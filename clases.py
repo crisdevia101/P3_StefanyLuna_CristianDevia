@@ -335,29 +335,4 @@ class GestorDICOM:
         ejes[1].set_title(f"{operacion} (kernel={tam_kernel})")
         for ax in ejes:
             ax.axis("off")
-        plt.show()T, (tam_kernel, tam_kernel))
-        operaciones = {
-            "erode": cv2.erode(recorte, kernel, iterations=1),
-            "dilate": cv2.dilate(recorte, kernel, iterations=1),
-            "open": cv2.morphologyEx(recorte, cv2.MORPH_OPEN, kernel),
-            "close": cv2.morphologyEx(recorte, cv2.MORPH_CLOSE, kernel),
-            "gradient": cv2.morphologyEx(recorte, cv2.MORPH_GRADIENT, kernel),
-            "tophat": cv2.morphologyEx(recorte, cv2.MORPH_TOPHAT, kernel),
-            "blackhat": cv2.morphologyEx(recorte, cv2.MORPH_BLACKHAT, kernel)
-        }
-
-        resultado = operaciones.get(operacion, recorte)
-
-        ruta_carpeta = self._asegurar_carpeta("morfologia")
-        ruta_guardado = os.path.join(ruta_carpeta, nombre_salida)
-        cv2.imwrite(ruta_guardado, resultado)
-        print("Imagen morfológica guardada en:", ruta_guardado)
-
-        fig, ejes = plt.subplots(1, 2, figsize=(8, 4))
-        ejes[0].imshow(recorte, cmap='gray')
-        ejes[0].set_title("Original")
-        ejes[1].imshow(resultado, cmap='gray')
-        ejes[1].set_title(f"{operacion} (kernel={tam_kernel})")
-        for ax in ejes:
-            ax.axis("off")
         plt.show()
