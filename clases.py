@@ -100,3 +100,35 @@ class GestorDICOM:
         self.espaciado_pixel = [float(primero.PixelSpacing[0]), float(primero.PixelSpacing[1])] if hasattr(primero, "PixelSpacing") else [1, 1]
         self.espesor_corte = float(primero.SliceThickness) if hasattr(primero, "SliceThickness") else 1
 
+    def construir_volumen(self):
+        """
+        Construye la matriz 3D. Convierte cada imagen 2D en
+        un arreglo de NumPy de tipo float32 y las apila en el eje z
+        """
+        if len(self.lista_slices) == 0:
+            self.cargar_imagenes()
+
+        imagenes = []
+        for ds in self.lista_slices:
+            try:
+                arr = ds.pixel_array.astype(np.float32)
+                imagenes.append(arr)
+            except:
+                pass
+
+        self.volumen = np.stack(imagenes, axis=0)
+        return self.volumen
+
+    def obtener_dataframe_datos(self):
+        """
+        Crea un DataFrame con los data elements DICOM
+        """
+        registros = []
+        for ds in self.lista_slices:
+            datos = {}
+            for elem in ds:
+                if elem.VR != 'SQ':
+                    datos[str(elem.keyword)] = str(elem.value)
+            registros.append(datos)
+        df = pd.DataFrame(registros)
+        return df
