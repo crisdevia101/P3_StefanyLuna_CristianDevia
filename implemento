@@ -1,1 +1,21 @@
+from clases import *
+
+if _name_ == "_main_":
+    print("")
+
+    almacen_estudios = {} 
+
+    while True:
+        print("\nMENÚ PRINCIPAL")
+        print("1. Cargar carpeta DICOM y construir volumen 3D")
+        print("2. Mostrar cortes ortogonales")
+        print("3. Realizar zoom y guardar recorte")
+        print("4. Segmentar por umbral")
+        print("5. Aplicar transformación morfológica")
+        print("6. Convertir a formato NIfTI")
+        print("7. Guardar metadatos en CSV")
+        print("8. Salir")
+
+        opcion = input("Seleccione una opción: ")
+
 
