@@ -258,3 +258,106 @@ class GestorDICOM:
         ejes[1].set_title("Recorte guardado")
         ejes[1].axis("off")
         plt.show()
+
+    def segmentar_umbral(self, indice_z, x1, y1, x2, y2, tipo_umbral=0, valor_umbral=127):
+        """
+        Aplica una segmentacion por umbral sobre un recorte del corte DICOM,
+        lo que nos permite elegir el tipo de binarizacion y guarda el resultado
+        """
+        corte = self.volumen[indice_z, :, :]
+        x_min, x_max = sorted([x1, x2])
+        y_min, y_max = sorted([y1, y2])
+
+        h, w = corte.shape
+        x_min = max(0, min(x_min, w - 1))
+        x_max = max(0, min(x_max, w))
+        y_min = max(0, min(y_min, h - 1))
+        y_max = max(0, min(y_max, h))
+
+        if x_max <= x_min or y_max <= y_min:
+            print("Error: coordenadas de recorte inválidas.")
+            return
+
+        recorte = self._normalizar_a_uint8(corte[y_min:y_max, x_min:x_max])
+        tipos = {
+            0: cv2.THRESH_BINARY,
+            1: cv2.THRESH_BINARY_INV,
+            2: cv2.THRESH_TRUNC,
+            3: cv2.THRESH_TOZERO,
+            4: cv2.THRESH_TOZERO_INV
+        }
+        _, resultado = cv2.threshold(recorte, valor_umbral, 255, tipos.get(tipo_umbral, cv2.THRESH_BINARY))
+
+        ruta_carpeta = self._asegurar_carpeta("segmentacion")
+        nombre_salida = os.path.join(ruta_carpeta, f"segmentacion_{self.nombre_estudio}.png")
+        cv2.imwrite(nombre_salida, resultado)
+        print("Imagen segmentada guardada en:", nombre_salida)
+
+        fig, ejes = plt.subplots(1, 2, figsize=(8, 4))
+        ejes[0].imshow(recorte, cmap='gray')
+        ejes[0].set_title("Original")
+        ejes[1].imshow(resultado, cmap='gray')
+        ejes[1].set_title("Segmentada")
+        for ax in ejes:
+            ax.axis("off")
+        plt.show()
+
+    def transformacion_morfologica(self, indice_z, x1, y1, x2, y2, operacion="open", tam_kernel=3, nombre_salida="morfologia.png"):
+        """
+        Aplica una operacion morfologica (erosion, dilatacion, etc) sobre
+        un recorte del corte DICOM y guarda la imagen
+        """
+        corte = self.volumen[indice_z, :, :]
+        recorte = self._normalizar_a_uint8(corte[y1:y2, x1:x2])
+
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (tam_kernel, tam_kernel))
+        operaciones = {
+            "erode": cv2.erode(recorte, kernel, iterations=1),
+            "dilate": cv2.dilate(recorte, kernel, iterations=1),
+            "open": cv2.morphologyEx(recorte, cv2.MORPH_OPEN, kernel),
+            "close": cv2.morphologyEx(recorte, cv2.MORPH_CLOSE, kernel),
+            "gradient": cv2.morphologyEx(recorte, cv2.MORPH_GRADIENT, kernel),
+            "tophat": cv2.morphologyEx(recorte, cv2.MORPH_TOPHAT, kernel),
+            "blackhat": cv2.morphologyEx(recorte, cv2.MORPH_BLACKHAT, kernel)
+        }
+
+        resultado = operaciones.get(operacion, recorte)
+
+        ruta_carpeta = self._asegurar_carpeta("morfologia")
+        ruta_guardado = os.path.join(ruta_carpeta, nombre_salida)
+        cv2.imwrite(ruta_guardado, resultado)
+        print("Imagen morfológica guardada en:", ruta_guardado)
+
+        fig, ejes = plt.subplots(1, 2, figsize=(8, 4))
+        ejes[0].imshow(recorte, cmap='gray')
+        ejes[0].set_title("Original")
+        ejes[1].imshow(resultado, cmap='gray')
+        ejes[1].set_title(f"{operacion} (kernel={tam_kernel})")
+        for ax in ejes:
+            ax.axis("off")
+        plt.show()T, (tam_kernel, tam_kernel))
+        operaciones = {
+            "erode": cv2.erode(recorte, kernel, iterations=1),
+            "dilate": cv2.dilate(recorte, kernel, iterations=1),
+            "open": cv2.morphologyEx(recorte, cv2.MORPH_OPEN, kernel),
+            "close": cv2.morphologyEx(recorte, cv2.MORPH_CLOSE, kernel),
+            "gradient": cv2.morphologyEx(recorte, cv2.MORPH_GRADIENT, kernel),
+            "tophat": cv2.morphologyEx(recorte, cv2.MORPH_TOPHAT, kernel),
+            "blackhat": cv2.morphologyEx(recorte, cv2.MORPH_BLACKHAT, kernel)
+        }
+
+        resultado = operaciones.get(operacion, recorte)
+
+        ruta_carpeta = self._asegurar_carpeta("morfologia")
+        ruta_guardado = os.path.join(ruta_carpeta, nombre_salida)
+        cv2.imwrite(ruta_guardado, resultado)
+        print("Imagen morfológica guardada en:", ruta_guardado)
+
+        fig, ejes = plt.subplots(1, 2, figsize=(8, 4))
+        ejes[0].imshow(recorte, cmap='gray')
+        ejes[0].set_title("Original")
+        ejes[1].imshow(resultado, cmap='gray')
+        ejes[1].set_title(f"{operacion} (kernel={tam_kernel})")
+        for ax in ejes:
+            ax.axis("off")
+        plt.show()
