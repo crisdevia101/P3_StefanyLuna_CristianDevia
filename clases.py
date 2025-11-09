@@ -132,7 +132,9 @@ class GestorDICOM:
             registros.append(datos)
         df = pd.DataFrame(registros)
         return df
-    class EstudioImaginologico:
+
+    
+class EstudioImaginologico:
     def __init__(self, gestor_dicom, nombre_estudio="Estudio"):
         """
         Inicializa la clase para el objeto de estudio imaginologico
