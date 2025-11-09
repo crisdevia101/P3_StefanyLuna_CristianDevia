@@ -7,6 +7,15 @@ import matplotlib.pyplot as plt
 import nibabel as nib
 from datetime import datetime
 
+import os
+import numpy as np
+import pydicom
+import pandas as pd
+import cv2
+import matplotlib.pyplot as plt
+import nibabel as nib
+from datetime import datetime
+
 class GestorDICOM:
     def __init__(self, ruta_carpeta):
         """
@@ -30,38 +39,6 @@ class GestorDICOM:
                 if n.lower().endswith('.dcm'):
                     archivos.append(os.path.join(raiz, n))
         return archivos
-
-    def cargar_imagenes(self):
-        """
-        Carga y ordena los archivos DICOM
-        """
-        archivos = self._obtener_archivos_dcm()
-        if len(archivos) == 0:
-            raise FileNotFoundError("No se encontraron archivos DICOM.")
-
-        datasets = []
-        for a in archivos:
-            try:
-                ds = pydicom.dcmread(a)
-                datasets.append(ds)
-            except:
-                continue
-
-    def cargar_imagenes(self):
-        """
-        Carga y ordena los archivos DICOM
-        """
-        archivos = self._obtener_archivos_dcm()
-        if len(archivos) == 0:
-            raise FileNotFoundError("No se encontraron archivos DICOM.")
-
-        datasets = []
-        for a in archivos:
-            try:
-                ds = pydicom.dcmread(a)
-                datasets.append(ds)
-            except:
-                continue
 
     def cargar_imagenes(self):
         """
@@ -133,9 +110,9 @@ class GestorDICOM:
         df = pd.DataFrame(registros)
         return df
 
-    
+
 class EstudioImaginologico:
-    def __init__(self, gestor_dicom, nombre_estudio="Estudio"):
+    def __init__(self, gestor_dicom, nombre_estudio="Estudio"): 
         """
         Inicializa la clase para el objeto de estudio imaginologico
         y construye o asigna el volumen 3D y guarda su forma
@@ -166,7 +143,7 @@ class EstudioImaginologico:
             return abs((t2 - t1).total_seconds())
         except:
             return None
-            
+
     def _normalizar_a_uint8(self, imagen):
         minimo, maximo = np.min(imagen), np.max(imagen)
         if maximo == minimo:
@@ -175,7 +152,9 @@ class EstudioImaginologico:
         return normalizada.astype(np.uint8)
 
     def _asegurar_carpeta(self, nombre_subcarpeta):
-        """Crea carpetas dentro de resultados/ según la función."""
+        """
+        Crea carpetas dentro de resultados/ según la función
+        """
         ruta_carpeta = os.path.join("resultados", nombre_subcarpeta)
         os.makedirs(ruta_carpeta, exist_ok=True)
         return ruta_carpeta
