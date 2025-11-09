@@ -82,6 +82,17 @@ if _name_ == "_main_":
                 k = int(input("Tamaño del kernel: "))
                 nombre_archivo = input("Nombre del archivo resultante: ") or "morfologia.png"
                 estudio.transformacion_morfologica(z, x1, y1, x2, y2, op, k, nombre_archivo)
+            elif opcion == "6":
+                nombre_archivo = input("Nombre del archivo NIfTI: ") or "salida.nii.gz"
+                estudio.convertir_a_nifti(nombre_archivo)
 
+            elif opcion == "7":
+                nombre_csv = input("Nombre del archivo CSV: ") or "metadata.csv"
+                estudio.guardar_metadata_csv(nombre_csv)
 
+        elif opcion == "8":
+            print("Saliendo del programa...")
+            break
+        else:
+            print("Opción invalida. Intenta de nuevo.")
 
