@@ -336,3 +336,23 @@ class GestorDICOM:
         for ax in ejes:
             ax.axis("off")
         plt.show()
+
+    def convertir_a_nifti(self, nombre_salida="salida.nii.gz"):
+        """
+        Convierte el volumen 3D del estudio a formato NifTi (.nii.gz)
+        y lo guarda en la carpeta "nifti"""
+        matriz = self.volumen.astype(np.float32)
+        af = np.eye(4)
+        imagen_nifti = nib.Nifti1Image(matriz, af)
+
+        ruta_carpeta = self._asegurar_carpeta("nifti")
+        ruta_guardado = os.path.join(ruta_carpeta, nombre_salida)
+        nib.save(imagen_nifti, ruta_guardado)
+        print("Archivo NIfTI guardado en:", ruta_guardado)
+
+    def guardar_metadata_csv(self, nombre_csv="metadata.csv"):
+        df = self.gestor.obtener_dataframe_datos()
+        ruta_carpeta = self._asegurar_carpeta("metadata")
+        ruta_guardado = os.path.join(ruta_carpeta, nombre_csv)
+        df.to_csv(ruta_guardado, index=False)
+        print("Archivo CSV guardado en:", ruta_guardado)
